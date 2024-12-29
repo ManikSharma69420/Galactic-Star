@@ -1,135 +1,160 @@
 #include <SDL.h>
+#include <SDL_ttf.h>
 #include <iostream>
-#include <random>
+#include <string>
+#include <sstream>
+#include <cstdlib>
 
-void play() {
-    int score = 0;
+template <typename T>
+std::string to_string(const T& value) {
+    std::ostringstream oss;
+    oss << value;
+    return oss.str();
+}
 
-    std::string x = "Wave 1!";
-    int y = 400;
-    int z = 1;
-    int a = 5;
+void cleanUp(SDL_Window* window, SDL_Renderer* renderer, TTF_Font* wave_font, TTF_Font* score_font) {
+    if (wave_font) TTF_CloseFont(wave_font);
+    if (score_font) TTF_CloseFont(score_font);
+    if (renderer) SDL_DestroyRenderer(renderer);
+    if (window) SDL_DestroyWindow(window);
+    TTF_Quit();
+    SDL_Quit();
+}
 
-    SDL_Init(SDL_INIT_VIDEO);
+int main(int argc, char* argv[]) {
+    if (SDL_Init(SDL_INIT_VIDEO) < 0) {
+        std::cerr << "SDL_Init Error: " << SDL_GetError() << std::endl;
+        return -1;
+    }
+
+    if (TTF_Init() == -1) {
+        std::cerr << "TTF_Init Error: " << TTF_GetError() << std::endl;
+        SDL_Quit();
+        return -1;
+    }
+
     SDL_Window* window = SDL_CreateWindow("ThePOCGame", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 480, 640, 0);
-    SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
+    if (!window) {
+        std::cerr << "SDL_CreateWindow Error: " << SDL_GetError() << std::endl;
+        SDL_Quit();
+        return -1;
+    }
 
-    SDL_Rect Player_rect = { 30, 320, 45, 60 };
-    SDL_Rect pipe_rect = { 30, 320, 45, 70 };
+    SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
+    if (!renderer) {
+        std::cerr << "SDL_CreateRenderer Error: " << SDL_GetError() << std::endl;
+        SDL_DestroyWindow(window);
+        SDL_Quit();
+        return -1;
+    }
+
+    TTF_Font* wave_font = TTF_OpenFont("Consolas.ttf", 30);
+    TTF_Font* score_font = TTF_OpenFont("Consolas.ttf", 20);
+    if (!wave_font || !score_font) {
+        std::cerr << "TTF_OpenFont Error: " << TTF_GetError() << std::endl;
+        cleanUp(window, renderer, wave_font, score_font);
+        return -1;
+    }
 
     SDL_Event event;
-    float Player_velocity = 0.0f; // Bird's falling speed (velocity)
-    float gravity = 0.75f; // Gravity force
-    float jump_strength = -12.0f; // Jump strength
-    Player_rect.y = 320;
+    SDL_Rect Player_rect = { 30, 320, 45, 60 };
+    SDL_Rect pipe_rect = { 480, 320, 45, 70 };
 
-    auto wave_check = [&]() {
-        std::cout << "Wave: " << x << std::endl;
-        };
+    int score = 0;
+    int pipe_speed = 5;
+    std::string wave_text = "Wave 1";
+    float Player_velocity = 0;
+    float gravity = 0.75f;
+    float jump_strength = -12.0f;
 
-    auto show_score = [&]() {
-        std::cout << "Score: " << score << std::endl;
-        };
-
-    wave_check();
-
-    while (true) {
+    bool running = true;
+    while (running) {
         while (SDL_PollEvent(&event)) {
             if (event.type == SDL_QUIT) {
-                SDL_DestroyRenderer(renderer);
-                SDL_DestroyWindow(window);
-                SDL_Quit();
-                return;
+                running = false;
             }
-
-            if (event.type == SDL_KEYDOWN) {
-                if (event.key.keysym.sym == SDLK_SPACE) { // Press space to jump
-                    Player_velocity = jump_strength;
-                }
+            if (event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_SPACE) {
+                Player_velocity = jump_strength;
             }
         }
 
         // Apply gravity
         Player_velocity += gravity;
-
-        if (Player_velocity > 50.0f) {
-            Player_velocity = 50.0f;
-        }
-
-        // Update the bird's position
+        if (Player_velocity > 50.0f) Player_velocity = 50.0f;
         Player_rect.y += static_cast<int>(Player_velocity);
 
-        // Prevent bird from falling out of bounds
-        if (Player_rect.y > 640) {
-            Player_rect.y = 0;
-        }
+        // Wrap the player around the screen
+        if (Player_rect.y > 640) Player_rect.y = 0;
+        if (Player_rect.y < 0) Player_rect.y = 640;
 
-        if (Player_rect.y < 0) {
-            Player_rect.y = 640;
-        }
-
-        if (Player_rect.x > 480) {
-            Player_rect.x = -50;
-        }
-
-        // Move the pipe
-        pipe_rect.x -= a;
-
-        if (pipe_rect.x < -70) { // Reset pipe position
+        // Move the pipe and reset its position if it goes off-screen
+        pipe_rect.x -= pipe_speed;
+        if (pipe_rect.x < -pipe_rect.w) {
             pipe_rect.x = 480;
             pipe_rect.y = rand() % 570;
-            score += 1;
+            score++;
         }
 
-        // Clear screen and redraw
-        SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+        // Adjust game difficulty based on score
+        if (score <= 10) {
+            pipe_speed = 5;
+            wave_text = "Wave 1";
+        }
+        else if (score <= 20) {
+            pipe_speed = 10;
+            wave_text = "Wave 2";
+        }
+        else if (score <= 30) {
+            pipe_speed = 15;
+            wave_text = "Wave 3";
+        }
+        else if (score <= 40) {
+            pipe_speed = 20;
+            wave_text = "Wave 4";
+        }
+        else if (score <= 50) {
+            pipe_speed = 25;
+            wave_text = "Wave 5";
+        }
+
+        // Check for collision
+        if (SDL_HasIntersection(&Player_rect, &pipe_rect)) {
+            score = 0; // Reset score on collision
+        }
+
+        // Render everything
+        SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255); // Black background
         SDL_RenderClear(renderer);
-        SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
+
+        // Render the player
+        SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255); // Red for the player
         SDL_RenderFillRect(renderer, &Player_rect);
-        SDL_SetRenderDrawColor(renderer, 255, 255, 0, 255);
+
+        // Render the pipe
+        SDL_SetRenderDrawColor(renderer, 255, 255, 0, 255); // Yellow for the pipe
         SDL_RenderFillRect(renderer, &pipe_rect);
 
-        if (SDL_HasIntersection(&Player_rect, &pipe_rect)) {
-            score = 0;
-        }
+        // Render wave text
+        SDL_Surface* wave_surface = TTF_RenderText_Solid(wave_font, wave_text.c_str(), { 255, 255, 255 });
+        SDL_Texture* wave_texture = SDL_CreateTextureFromSurface(renderer, wave_surface);
+        SDL_Rect wave_rect = { 135, 600, wave_surface->w, wave_surface->h };
+        SDL_RenderCopy(renderer, wave_texture, nullptr, &wave_rect);
+        SDL_FreeSurface(wave_surface);
+        SDL_DestroyTexture(wave_texture);
 
-        show_score();
-
-        if (score > 0 && score <= 10) {
-            a = 5;
-            x = "Wave 1";
-            wave_check();
-        }
-        else if (score > 10 && score <= 20) {
-            a = 10;
-            x = "Wave 2";
-            wave_check();
-        }
-        else if (score > 20 && score <= 30) {
-            a = 15;
-            x = "Wave 3";
-            wave_check();
-        }
-        else if (score > 30 && score <= 40) {
-            a = 20;
-            x = "Wave 4";
-            wave_check();
-        }
-        else if (score > 40 && score <= 50) {
-            a = 25;
-            x = "Wave 5";
-            wave_check();
-        }
-        else if (score > 50) {
-            a = 30;
-        }
+        // Render score
+        std::string score_text = "Score: " + to_string(score);
+        SDL_Surface* score_surface = TTF_RenderText_Solid(score_font, score_text.c_str(), { 255, 255, 255 });
+        SDL_Texture* score_texture = SDL_CreateTextureFromSurface(renderer, score_surface);
+        SDL_Rect score_rect = { 0, 0, score_surface->w, score_surface->h };
+        SDL_RenderCopy(renderer, score_texture, nullptr, &score_rect);
+        SDL_FreeSurface(score_surface);
+        SDL_DestroyTexture(score_texture);
 
         SDL_RenderPresent(renderer);
-        SDL_Delay(1000 / 60);
+        SDL_Delay(1000 / 60); // Cap frame rate to ~60 FPS
     }
-}
 
-int main(int argc, char* argv[]) {
-    play();
+    cleanUp(window, renderer, wave_font, score_font);
     return 0;
 }
