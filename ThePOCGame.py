@@ -1,5 +1,6 @@
 import pygame
 import random
+import sys
 
 is_game_paused = False
 
@@ -63,7 +64,7 @@ def play():
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     pygame.quit()
-                    exit()
+                    sys.exit()
 
                 if event.type == pygame.KEYDOWN:
                     if event.key in (pygame.K_p, pygame.K_ESCAPE): 
@@ -80,7 +81,7 @@ def play():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
-                exit()
+                sys.exit()
 
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_SPACE or event.key == pygame.K_UP:  # Press space to make the bird "jump"
@@ -194,7 +195,7 @@ while True:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             pygame.quit()
-            exit()
+            sys.exit()()
 
         if event.type == pygame.KEYDOWN:
             if event.key in (pygame.K_RETURN, pygame.K_KP_ENTER): 
