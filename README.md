@@ -5,7 +5,7 @@ or website build (https://maniksharma69420.github.io/ThePOCGame.html/)
 The .js is optimized for browser
 
 to use it on ur local machine,
-open a port to http://localhose:8000
+open a port to http://localhost:8000
 
 the HTML page should look something like this:
 ```
