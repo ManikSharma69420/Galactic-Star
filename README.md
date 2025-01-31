@@ -1,7 +1,7 @@
 # ThePOCGame
 
 Use C++ or Python Build
-or website build (https://maniksharma69420.github.io/ThePOCGame.html/)
+or website build (https://maniksharma69420.github.io/ThePOCGame.html)
 The .js is optimized for browser
 
 to use it on ur local machine,
