@@ -8,7 +8,7 @@ open a port to http://localhose:8000
 
 the HTML page should look something like this:
 
-```<!DOCTYPE html>
+`<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -18,7 +18,7 @@ the HTML page should look something like this:
 <body>
     <script type="module" src="ThePOCGame.js"></script>
 </body>
-</html>```
+</html>`
 
 okay now go play it :D
 
