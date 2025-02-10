@@ -7,7 +7,7 @@ or website build (https://maniksharma69420.github.io/ThePOCGame.html)
 The .js is optimized for browser
 
 to use it on ur local machine,
-install python 3.x
+install python 3.x (from <a href="https://www.python.org">here</a>)
 THEN, execute this command:
 
 ```python -m http.server 8000```
