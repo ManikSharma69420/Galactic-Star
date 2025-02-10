@@ -8,7 +8,7 @@ The .js is optimized for browser
 
 to use it on ur local machine,
 install python 3.x
-THEN execute this command:
+THEN, execute this command:
 
 ```python -m http.server 8000```
 
