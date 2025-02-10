@@ -1,5 +1,7 @@
 # ThePOCGame
 
+**THE Python BUILD IS LACKING A LOT OF UPDATES - ILL ADD TO IT WHEN I FEEL LIKE IT.**
+
 Use C++ or Python Build
 or website build (https://maniksharma69420.github.io/ThePOCGame.html)
 The .js is optimized for browser
