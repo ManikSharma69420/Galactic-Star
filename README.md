@@ -1,4 +1,4 @@
-# ThePOCGame
+# Galactic Star
 
 **THE Python BUILD IS LACKING A LOT OF UPDATES - ILL ADD TO IT WHEN I FEEL LIKE IT.**
 
