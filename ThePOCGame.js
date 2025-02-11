@@ -190,7 +190,8 @@ async function main() {
     context.fillRect(0, 0, gameWindow.width, gameWindow.height);
     context.font = titleFontSize + " Consolas"; // Dynamic font size for title
     context.fillStyle = "white";
-    context.fillText("Galactic\nStar", 35, 200);
+    context.fillText("Galactic", 35, 200);
+    context.fillText("Star", 35, 250); // Adjust the Y-coordinate for the second line
 
     context.font = "20px Consolas";
     context.fillText("Press Enter or Tap to Play", 100, 600);
