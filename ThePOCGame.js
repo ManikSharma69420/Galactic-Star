@@ -153,7 +153,7 @@ async function main() {
     context.fillRect(0, 0, gameWindow.width, gameWindow.height);
     context.font = "75px Consolas";
     context.fillStyle = "white";
-    context.fillText("ThePOCGame", 35, 200);
+    context.fillText("Galactic/nStar", 35, 200);
     context.font = "20px Consolas";
     context.fillText("Press Enter to Play", 75, 600);
 
